@@ -5,7 +5,7 @@ import path from 'path';
 
 import { getDataForId, calculateHoursWorked, getDayName } from '../utils/helpers.js';
 
-const rutaDestino = "/Users/Juan/Desktop";
+const rutaDestino = "/Users/Juan/Desktop"; // Ruta de destino para guardar el PDF
 
 export const generatePdf = (req, res) => {
     const { id, startDate, endDate, nombreArchivo } = req.body;
@@ -15,7 +15,6 @@ export const generatePdf = (req, res) => {
     }
     
     try {
-        
         const fileContent = fs.readFileSync(`./src/uploads/${nombreArchivo}`, 'utf8');
 
         if (!fileContent) {
@@ -84,35 +83,28 @@ export const generatePdf = (req, res) => {
         doc.setFontSize(12);
         doc.text(`Total de horas trabajadas: ${totalHorasTrabajadasFormatted}`, 14, doc.autoTable.previous.finalY + 10);
 
-        // Guardar el PDF en la carpeta src/uploads
-         // Guardar el PDF en la carpeta src/uploads
-         try {
-            // Guardar el PDF en la carpeta src/downloads
-            const fileName = `Registro de asistencia ID:${id}.pdf`;
-            const outputPath = path.resolve(rutaDestino, fileName);
-            doc.save(outputPath);
-            console.log('PDF generado:', outputPath);
-    
-            /* // Enviar el PDF como respuesta al cliente para descargar
-             const fileStream = fs.createReadStream(outputPath);
-            fileStream.pipe(res);
-            fileStream.on('error', (err) => {
-                console.error('Error al enviar el archivo al navegador', err);
-                res.status(500).send('Error al enviar el archivo al navegador');
-            });
-            fileStream.on('close', () => {
-                fs.unlink(outputPath, (err) => {
-                    if (err) console.error('Error al eliminar el archivo', err);
-                });
-            });  */
-    
-        } catch (error) {
-            console.error('Error al generar y enviar el PDF:', error);
-            res.status(500).send('Error al generar y enviar el PDF');
-        }
+        // Guardar el PDF en la carpeta especificada y enviar como respuesta
+        const fileName = `Registro de asistencia ID ${id}.pdf`; // Nombre del archivo con extensión PDF
+        const outputPath = path.resolve(rutaDestino, fileName);
+        doc.save(outputPath);
+
+        // Enviar el PDF como respuesta al cliente
+        const fileStream = fs.createReadStream(outputPath);
+        fileStream.pipe(res);
+        fileStream.on('error', (err) => {
+            console.error('Error al enviar el archivo al navegador', err);
+            res.status(500).send('Error al enviar el archivo al navegador');
+        });
+        fileStream.on('close', () => {
+            // Opcional: Eliminar el archivo después de enviarlo (comentado para evitar borrarlo accidentalmente)
+            // fs.unlink(outputPath, (err) => {
+            //     if (err) console.error('Error al eliminar el archivo', err);
+            // });
+            console.log('PDF enviado correctamente.');
+        });
 
     } catch (error) {
-        console.error('Error al generar el PDF:', error);
-        res.status(500).send('Error al generar el PDF');
+        console.error('Error al generar y enviar el PDF:', error);
+        res.status(500).send('Error al generar y enviar el PDF');
     }
 };
