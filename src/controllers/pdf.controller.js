@@ -87,6 +87,7 @@ export const generatePdf = (req, res) => {
         const fileName = `Registro de asistencia ID ${id}.pdf`; // Nombre del archivo con extensión PDF
         const outputPath = path.resolve(rutaDestino, fileName);
         doc.save(outputPath);
+        console.log(outputPath);
 
         // Enviar el PDF como respuesta al cliente
         const fileStream = fs.createReadStream(outputPath);
@@ -96,11 +97,10 @@ export const generatePdf = (req, res) => {
             res.status(500).send('Error al enviar el archivo al navegador');
         });
         fileStream.on('close', () => {
-            // Opcional: Eliminar el archivo después de enviarlo (comentado para evitar borrarlo accidentalmente)
+            // Opcional: Eliminar el archivo después de enviarlo
             // fs.unlink(outputPath, (err) => {
             //     if (err) console.error('Error al eliminar el archivo', err);
             // });
-            console.log('PDF enviado correctamente.');
         });
 
     } catch (error) {
